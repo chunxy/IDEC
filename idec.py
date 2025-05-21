@@ -123,7 +123,7 @@ def pretrain_ae(model):
     optimizer = Adam(model.parameters(), lr=args.lr)
     for epoch in range(200):
         total_loss = 0.
-        for batch_idx, (x, _, _) in enumerate(train_loader):
+        for batch_idx, x in enumerate(train_loader):
             x = x.to(device)
 
             optimizer.zero_grad()
