@@ -1,3 +1,6 @@
+source $MYDISK/miniconda3/etc/profile.d/conda.sh
+conda activate system
+
 python idec.py \
 --dataset sift \
 --n_clusters 1000 \
