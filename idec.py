@@ -59,15 +59,15 @@ class AE(nn.Module):
         enc = F.relu(self.enc_2(enc))
         enc = F.relu(self.enc_3(enc))
 
-        z = self.z_layer(enc)
+        enc = self.z_layer(enc)
 
         # decoder
-        dec = F.relu(self.dec_1(z))
+        dec = F.relu(self.dec_1(enc))
         dec = F.relu(self.dec_2(dec))
         dec = F.relu(self.dec_3(dec))
-        x_bar = self.x_bar_layer(dec)
+        dec = self.x_bar_layer(dec)
 
-        return x_bar, z
+        return dec, enc
 
 
 class IDEC(nn.Module):
@@ -177,14 +177,10 @@ def train_idec():
                               shuffle=False)
     optimizer = Adam(model.parameters(), lr=args.lr)
 
-    print(torch.cuda.memory_summary(device=device, abbreviated=True))
-
     # cluster parameter initiate
     data = dataset.tensors[0]
     # y = dataset.y
     data = torch.Tensor(data).to(device)
-
-    print(torch.cuda.memory_summary(device=device, abbreviated=True))
 
     x_bar, hidden = model.ae(data)
 
