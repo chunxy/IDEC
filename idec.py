@@ -188,12 +188,13 @@ def train_idec():
     hidden_list = []
     x_bar_list = []
 
-    for i in range(0, n_samples, batch_size):
-        end = min(i + batch_size, n_samples)
-        batch = data[i:end]
-        x_bar_batch, hidden_batch = model.ae(batch)
-        hidden_list.append(hidden_batch)
-        x_bar_list.append(x_bar_batch)
+    with torch.no_grad():
+        for i in range(0, n_samples, batch_size):
+            end = min(i + batch_size, n_samples)
+            batch = data[i:end]
+            x_bar_batch, hidden_batch = model.ae(batch)
+            hidden_list.append(hidden_batch.cpu())
+            x_bar_list.append(x_bar_batch.cpu())
 
     hidden = torch.cat(hidden_list, dim=0)
     x_bar = torch.cat(x_bar_list, dim=0)
