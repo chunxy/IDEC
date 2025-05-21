@@ -212,7 +212,7 @@ def train_idec():
 
     model.train()
     for epoch in range(100):
-
+        print(f"Epoch {epoch} of 100")
         if epoch % args.update_interval == 0:
 
             _, tmp_q = model(data[:100000])
