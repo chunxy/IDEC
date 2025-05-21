@@ -109,7 +109,7 @@ class IDEC(nn.Module):
 
     def forward(self, x):
         # print GPU memory
-        print(torch.cuda.memory_allocated())
+        print("IDEC forward", torch.cuda.memory_allocated())
         x_bar, z = self.ae(x)
         # cluster
         n_samples = z.size(0)
@@ -150,7 +150,7 @@ def pretrain_ae(model):
 
         print("epoch {} loss={:.4f}".format(epoch,
                                             total_loss / (batch_idx + 1)))
-        torch.save(model.state_dict(), args.pretrain_path)
+    torch.save(model.state_dict(), args.pretrain_path)
     print("model saved to {}.".format(args.pretrain_path))
 
 
@@ -219,7 +219,7 @@ def train_idec():
     for epoch in range(100):
         print(f"Epoch {epoch} of 100")
         if epoch % args.update_interval == 0:
-
+            print("IDEC update", torch.cuda.memory_allocated())
             _, tmp_q = model(data)
 
             # update target distribution p
