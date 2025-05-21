@@ -111,11 +111,12 @@ class IDEC(nn.Module):
 
         x_bar, z = self.ae(x)
         # cluster
-        sum_distances = 0
-        for i in range(self.cluster_layer.size(0)):
-            distances = torch.sum(torch.pow(z - self.cluster_layer[i], 2), dim=1)
-            sum_distances += distances
-        q = 1.0 / (1.0 + sum_distances / self.alpha)
+        n_samples = z.size(0)
+        n_clusters = self.cluster_layer.size(0)
+        distances = torch.zeros(n_samples, n_clusters, device=z.device)
+        for i in range(n_clusters):
+            distances[:, i] = torch.sum(torch.pow(z - self.cluster_layer[i], 2), dim=1)
+        q = 1.0 / (1.0 + distances / self.alpha)
         q = q.pow((self.alpha + 1.0) / 2.0)
         q = (q.t() / torch.sum(q, 1)).t()
         return x_bar, q
