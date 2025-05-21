@@ -9,7 +9,7 @@ from __future__ import print_function, division
 import argparse
 import os
 import numpy as np
-from sklearn.cluster import KMeans
+from sklearn.cluster import BisectingKMeans
 from sklearn.metrics.cluster import normalized_mutual_info_score as nmi_score
 from sklearn.metrics import adjusted_rand_score as ari_score
 import torch
@@ -199,8 +199,10 @@ def train_idec():
     hidden = torch.cat(hidden_list, dim=0)
     x_bar = torch.cat(x_bar_list, dim=0)
 
-    kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
+    print(f"Fitting kmeans with {args.n_clusters} clusters")
+    kmeans = BisectingKMeans(n_clusters=args.n_clusters, n_init=20, init='k-means++')
     y_pred = kmeans.fit_predict(hidden.data.cpu().numpy())
+    print("Kmeans fit done")
     # nmi_k = nmi_score(y_pred, y)
     # print("nmi score={:.4f}".format(nmi_k))
 
