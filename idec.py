@@ -108,7 +108,8 @@ class IDEC(nn.Module):
         print('load pretrained ae from', path)
 
     def forward(self, x):
-
+        # print GPU memory
+        print(torch.cuda.memory_allocated())
         x_bar, z = self.ae(x)
         # cluster
         n_samples = z.size(0)
