@@ -3,7 +3,8 @@ conda activate system
 
 python idec.py \
 --dataset crawl \
---n_clusters 2000 \
+--n_samples 10000 \
+--n_clusters 100 \
 --batch_size 256 \
 --n_z 10 \
 --gamma 0.1 \

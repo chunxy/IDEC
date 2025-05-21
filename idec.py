@@ -313,7 +313,7 @@ if __name__ == "__main__":
     model = train_idec()
 
     with torch.no_grad():
-        encoded_train = model.ae(dataset.data).cpu().numpy()
+        encoded_train = model.ae(dataset.full_data).cpu().numpy()
         encoded_train = encoded_train.reshape(-1, args.n_z).astype(np.float32)
         template_encoded_train = "/research/d1/gds/cxye23/datasets/data/idec/{}-{}.base.float32"
         encoded_train.tofile(template_encoded_train.format(args.dataset, args.n_clusters))
