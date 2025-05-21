@@ -181,7 +181,7 @@ def train_idec():
     optimizer = Adam(model.parameters(), lr=args.lr)
 
     # cluster parameter initiate
-    data = dataset.tensors[0]
+    data = dataset.data
     # y = dataset.y
     data = torch.Tensor(data).to(device)
 
