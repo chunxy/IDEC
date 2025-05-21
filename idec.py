@@ -182,7 +182,21 @@ def train_idec():
     # y = dataset.y
     data = torch.Tensor(data).to(device)
 
-    x_bar, hidden = model.ae(data)
+    # Process data in batches to avoid GPU memory overflow
+    batch_size = 1000
+    n_samples = data.size(0)
+    hidden_list = []
+    x_bar_list = []
+
+    for i in range(0, n_samples, batch_size):
+        end = min(i + batch_size, n_samples)
+        batch = data[i:end]
+        x_bar_batch, hidden_batch = model.ae(batch)
+        hidden_list.append(hidden_batch)
+        x_bar_list.append(x_bar_batch)
+
+    hidden = torch.cat(hidden_list, dim=0)
+    x_bar = torch.cat(x_bar_list, dim=0)
 
     kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
     y_pred = kmeans.fit_predict(hidden.data.cpu().numpy())
@@ -200,7 +214,7 @@ def train_idec():
 
         if epoch % args.update_interval == 0:
 
-            _, tmp_q = model(data)
+            _, tmp_q = model(data[:100000])
 
             # update target distribution p
             tmp_q = tmp_q.data
