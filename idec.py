@@ -115,6 +115,7 @@ class IDEC(nn.Module):
         n_samples = z.size(0)
         n_clusters = self.cluster_layer.size(0)
         distances = torch.zeros(n_samples, n_clusters, device=z.device)
+        print("IDEC forward computing distances", torch.cuda.memory_allocated())
         for i in range(n_clusters):
             distances[:, i] = torch.sum(torch.pow(z - self.cluster_layer[i], 2), dim=1)
         q = 1.0 / (1.0 + distances / self.alpha)
