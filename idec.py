@@ -153,8 +153,7 @@ def pretrain_ae(model):
 
 def train_idec():
 
-    model = IDEC(
-        n_enc_1=500,
+    model = IDEC(n_enc_1=500,
                  n_enc_2=500,
                  n_enc_3=1000,
                  n_dec_1=1000,
@@ -173,16 +172,20 @@ def train_idec():
     else:
         model.pretrain()
 
-    train_loader = DataLoader(
-        dataset, batch_size=args.batch_size, shuffle=False)
+    train_loader = DataLoader(dataset,
+                              batch_size=args.batch_size,
+                              shuffle=False)
     optimizer = Adam(model.parameters(), lr=args.lr)
 
-    # print the CUDA memory used so far
-    print(torch.cuda.memory_summary(device=device, abbreviated=False))
+    print(torch.cuda.memory_summary(device=device, abbreviated=True))
+
     # cluster parameter initiate
     data = dataset.tensors[0]
     # y = dataset.y
     data = torch.Tensor(data).to(device)
+
+    print(torch.cuda.memory_summary(device=device, abbreviated=True))
+
     x_bar, hidden = model.ae(data)
 
     kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
