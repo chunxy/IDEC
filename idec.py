@@ -55,17 +55,17 @@ class AE(nn.Module):
     def forward(self, x):
 
         # encoder
-        enc_h1 = F.relu(self.enc_1(x))
-        enc_h2 = F.relu(self.enc_2(enc_h1))
-        enc_h3 = F.relu(self.enc_3(enc_h2))
+        enc = F.relu(self.enc_1(x))
+        enc = F.relu(self.enc_2(enc))
+        enc = F.relu(self.enc_3(enc))
 
-        z = self.z_layer(enc_h3)
+        z = self.z_layer(enc)
 
         # decoder
-        dec_h1 = F.relu(self.dec_1(z))
-        dec_h2 = F.relu(self.dec_2(dec_h1))
-        dec_h3 = F.relu(self.dec_3(dec_h2))
-        x_bar = self.x_bar_layer(dec_h3)
+        dec = F.relu(self.dec_1(z))
+        dec = F.relu(self.dec_2(dec))
+        dec = F.relu(self.dec_3(dec))
+        x_bar = self.x_bar_layer(dec)
 
         return x_bar, z
 
