@@ -177,6 +177,8 @@ def train_idec():
         dataset, batch_size=args.batch_size, shuffle=False)
     optimizer = Adam(model.parameters(), lr=args.lr)
 
+    # print the CUDA memory used so far
+    print(torch.cuda.memory_summary(device=device, abbreviated=False))
     # cluster parameter initiate
     data = dataset.tensors[0]
     # y = dataset.y
