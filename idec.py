@@ -21,6 +21,15 @@ from torch.nn import Linear
 
 from utils import MnistDataset, cluster_acc
 
+# import debugpy
+# try:
+#     debugpy.listen(("localhost", 9501))
+#     print("Waiting for debugger attach")
+#     debugpy.wait_for_client()
+# except Exception as e:
+#     pass
+
+
 
 class AE(nn.Module):
 
@@ -124,7 +133,8 @@ def pretrain_ae(model):
     for epoch in range(200):
         total_loss = 0.
         for batch_idx, x in enumerate(train_loader):
-            x = x.to(device)
+            assert type(x) is list
+            x = x[0].to(device)
 
             optimizer.zero_grad()
             x_bar, z = model(x)
@@ -164,14 +174,14 @@ def train_idec():
 
     # cluster parameter initiate
     data = dataset.x
-    y = dataset.y
+    # y = dataset.y
     data = torch.Tensor(data).to(device)
     x_bar, hidden = model.ae(data)
 
     kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
     y_pred = kmeans.fit_predict(hidden.data.cpu().numpy())
-    nmi_k = nmi_score(y_pred, y)
-    print("nmi score={:.4f}".format(nmi_k))
+    # nmi_k = nmi_score(y_pred, y)
+    # print("nmi score={:.4f}".format(nmi_k))
 
     hidden = None
     x_bar = None
@@ -196,11 +206,11 @@ def train_idec():
                 np.float32) / y_pred.shape[0]
             y_pred_last = y_pred
 
-            acc = cluster_acc(y, y_pred)
-            nmi = nmi_score(y, y_pred)
-            ari = ari_score(y, y_pred)
-            print('Iter {}'.format(epoch), ':Acc {:.4f}'.format(acc),
-                  ', nmi {:.4f}'.format(nmi), ', ari {:.4f}'.format(ari))
+            # acc = cluster_acc(y, y_pred)
+            # nmi = nmi_score(y, y_pred)
+            # ari = ari_score(y, y_pred)
+            # print('Iter {}'.format(epoch), ':Acc {:.4f}'.format(acc),
+            #       ', nmi {:.4f}'.format(nmi), ', ari {:.4f}'.format(ari))
 
             if epoch > 0 and delta_label < args.tol:
                 print('delta_label {:.4f}'.format(delta_label), '< tol',
@@ -267,11 +277,12 @@ if __name__ == "__main__":
         template_train = "/research/d1/gds/cxye23/datasets/data/{}_base.float32"
         template_model = "/research/d1/gds/cxye23/datasets/data/idec/ae_{}_{}.pkl"
         data = np.fromfile(template_train.format(args.dataset), dtype=np.float32)
+        data = data.reshape(-1, datasets[args.dataset])
         data = torch.from_numpy(data).to(device)
         args.n_input = datasets[args.dataset]
         args.n_z = args.n_input // 2
         args.pretrain_path = template_model.format(args.dataset, args.n_clusters)
-        dataset = data
+        dataset = torch.utils.data.TensorDataset(data)
     print(args)
     model = train_idec()
 
