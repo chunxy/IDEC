@@ -222,6 +222,17 @@ def train_idec():
             loss.backward()
             optimizer.step()
 
+    return model
+
+
+datasets = {
+  "gist": 960,
+  "crawl": 300,
+  "glove100": 100,
+  "audio": 128,
+  "video": 1024,
+  "sift": 128,
+}
 
 if __name__ == "__main__":
 
@@ -252,5 +263,27 @@ if __name__ == "__main__":
         args.n_clusters = 10
         args.n_input = 784
         dataset = MnistDataset()
+    else:
+        template_train = "/home/chunxy/repos/Compass/data/{}_base.float32"
+        template_model = "data/ae_{}_{}.pkl"
+        data = np.fromfile(template_train.format(args.dataset), dtype=np.float32)
+        data = torch.from_numpy(data).to(device)
+        args.n_input = datasets[args.dataset]
+        args.n_z = args.n_input // 2
+        args.pretrain_path = template_model.format(args.dataset, args.n_clusters)
+        dataset = data
     print(args)
-    train_idec()
+    model = train_idec()
+
+    encoded_train = model.ae(data).cpu().numpy()
+    encoded_train = encoded_train.reshape(-1, args.n_z).astype(np.float32)
+    template_encoded_train = "/home/chunxy/repos/Compass/data/{}-{}.base.float32"
+    encoded_train.tofile(template_encoded_train.format(args.dataset, args.n_clusters))
+
+    template_query = "/home/chunxy/repos/Compass/data/{}_query.float32"
+    query = np.fromfile(template_query.format(args.dataset), dtype=np.float32)
+    query = torch.from_numpy(query).to(device)
+    encoded_query = model.ae(query).cpu().numpy()
+    encoded_query = encoded_query.reshape(-1, args.n_z).astype(np.float32)
+    template_encoded_query = "/home/chunxy/repos/Compass/data/{}-{}.query.float32"
+    encoded_query.tofile(template_encoded_query.format(args.dataset, args.n_clusters))
