@@ -300,8 +300,8 @@ if __name__ == "__main__":
     else:
         template_train = "/research/d1/gds/cxye23/datasets/data/{}_base.float32"
         template_model = "/research/d1/gds/cxye23/datasets/data/idec/ae_{}_{}.pkl"
-        data = np.fromfile(template_train.format(args.dataset), dtype=np.float32)[:args.n_samples]
-        data = data.reshape(-1, datasets[args.dataset])
+        data = np.fromfile(template_train.format(args.dataset), dtype=np.float32)
+        data = data.reshape(-1, datasets[args.dataset])[:args.n_samples]
         data = torch.from_numpy(data)
         args.n_input = datasets[args.dataset]
         args.n_z = args.n_input // 2
