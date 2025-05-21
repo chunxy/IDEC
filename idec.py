@@ -7,6 +7,7 @@
 # Distributed under terms of the MIT license.
 from __future__ import print_function, division
 import argparse
+import os
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics.cluster import normalized_mutual_info_score as nmi_score
@@ -154,26 +155,30 @@ def train_idec():
 
     model = IDEC(
         n_enc_1=500,
-        n_enc_2=500,
-        n_enc_3=1000,
-        n_dec_1=1000,
-        n_dec_2=500,
-        n_dec_3=500,
-        n_input=args.n_input,
-        n_z=args.n_z,
-        n_clusters=args.n_clusters,
-        alpha=1.0,
-        pretrain_path=args.pretrain_path).to(device)
+                 n_enc_2=500,
+                 n_enc_3=1000,
+                 n_dec_1=1000,
+                 n_dec_2=500,
+                 n_dec_3=500,
+                 n_input=args.n_input,
+                 n_z=args.n_z,
+                 n_clusters=args.n_clusters,
+                 alpha=1.0,
+                 pretrain_path=args.pretrain_path).to(device)
 
     #  model.pretrain('data/ae_mnist.pkl')
-    model.pretrain()
+    # if pretrain_path exists, load it
+    if os.path.exists(args.pretrain_path):
+        model.pretrain(args.pretrain_path)
+    else:
+        model.pretrain()
 
     train_loader = DataLoader(
         dataset, batch_size=args.batch_size, shuffle=False)
     optimizer = Adam(model.parameters(), lr=args.lr)
 
     # cluster parameter initiate
-    data = dataset.x
+    data = dataset.tensors[0]
     # y = dataset.y
     data = torch.Tensor(data).to(device)
     x_bar, hidden = model.ae(data)
