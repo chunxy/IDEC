@@ -264,8 +264,8 @@ if __name__ == "__main__":
         args.n_input = 784
         dataset = MnistDataset()
     else:
-        template_train = "/home/chunxy/repos/Compass/data/{}_base.float32"
-        template_model = "data/ae_{}_{}.pkl"
+        template_train = "/research/d1/gds/cxye23/datasets/data/{}_base.float32"
+        template_model = "/research/d1/gds/cxye23/datasets/data/idec/ae_{}_{}.pkl"
         data = np.fromfile(template_train.format(args.dataset), dtype=np.float32)
         data = torch.from_numpy(data).to(device)
         args.n_input = datasets[args.dataset]
@@ -277,13 +277,13 @@ if __name__ == "__main__":
 
     encoded_train = model.ae(data).cpu().numpy()
     encoded_train = encoded_train.reshape(-1, args.n_z).astype(np.float32)
-    template_encoded_train = "/home/chunxy/repos/Compass/data/{}-{}.base.float32"
+    template_encoded_train = "/research/d1/gds/cxye23/datasets/data/idec/{}-{}.base.float32"
     encoded_train.tofile(template_encoded_train.format(args.dataset, args.n_clusters))
 
-    template_query = "/home/chunxy/repos/Compass/data/{}_query.float32"
+    template_query = "/research/d1/gds/cxye23/datasets/data/{}_query.float32"
     query = np.fromfile(template_query.format(args.dataset), dtype=np.float32)
     query = torch.from_numpy(query).to(device)
     encoded_query = model.ae(query).cpu().numpy()
     encoded_query = encoded_query.reshape(-1, args.n_z).astype(np.float32)
-    template_encoded_query = "/home/chunxy/repos/Compass/data/{}-{}.query.float32"
+    template_encoded_query = "/research/d1/gds/cxye23/datasets/data/idec/{}-{}.query.float32"
     encoded_query.tofile(template_encoded_query.format(args.dataset, args.n_clusters))
