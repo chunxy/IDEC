@@ -307,7 +307,7 @@ if __name__ == "__main__":
         args.n_input = datasets[args.dataset]
         args.n_z = args.n_input // 2
         args.pretrain_path = template_model.format(args.dataset, args.n_clusters)
-        dataset = Float32Dataset(template_train.format(args.dataset), args.n_input)
+        dataset = Float32Dataset(template_train.format(args.dataset), args.n_input, args.n_samples)
     print(args)
     model = train_idec()
 

@@ -39,8 +39,9 @@ class MnistDataset(Dataset):
 
 class Float32Dataset(Dataset):
 
-    def __init__(self, path, dim):
+    def __init__(self, path, dim, n_samples):
         self.data = np.fromfile(path, dtype=np.float32).reshape(-1, dim)
+        self.data = np.random.permutation(self.data)[:n_samples]
 
     def __len__(self):
         return self.data.shape[0]
