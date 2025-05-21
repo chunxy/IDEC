@@ -111,9 +111,17 @@ class IDEC(nn.Module):
     def forward(self, x):
 
         x_bar, z = self.ae(x)
-        # cluster
-        q = 1.0 / (1.0 + torch.sum(
-            torch.pow(z.unsqueeze(1) - self.cluster_layer, 2), 2) / self.alpha)
+        # Compute distances without broadcasting
+        n_samples = z.size(0)
+        n_clusters = self.cluster_layer.size(0)
+        distances = torch.zeros(n_samples, n_clusters, device=z.device)
+
+        # Compute distances for each cluster
+        for i in range(n_clusters):
+            distances[:, i] = torch.sum(torch.pow(z - self.cluster_layer[i], 2), dim=1)
+
+        # Compute q without broadcasting
+        q = 1.0 / (1.0 + distances / self.alpha)
         q = q.pow((self.alpha + 1.0) / 2.0)
         q = (q.t() / torch.sum(q, 1)).t()
         return x_bar, q
