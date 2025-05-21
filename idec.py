@@ -200,7 +200,7 @@ def train_idec():
     x_bar = torch.cat(x_bar_list, dim=0)
 
     print(f"Fitting kmeans with {args.n_clusters} clusters")
-    kmeans = BisectingKMeans(n_clusters=args.n_clusters, n_init=20, init='k-means++')
+    kmeans = BisectingKMeans(n_clusters=args.n_clusters, init='k-means++', bisecting_strategy="biggest_inertia")
     y_pred = kmeans.fit_predict(hidden.data.cpu().numpy())
     print("Kmeans fit done")
     # nmi_k = nmi_score(y_pred, y)
@@ -217,7 +217,7 @@ def train_idec():
         print(f"Epoch {epoch} of 100")
         if epoch % args.update_interval == 0:
 
-            _, tmp_q = model(data[:100000])
+            _, tmp_q = model(data)
 
             # update target distribution p
             tmp_q = tmp_q.data
@@ -286,6 +286,7 @@ if __name__ == "__main__":
         help='coefficient of clustering loss')
     parser.add_argument('--update_interval', default=1, type=int)
     parser.add_argument('--tol', default=0.001, type=float)
+    parser.add_argument('--n_samples', default=100000, type=int)
     args = parser.parse_args()
     args.cuda = torch.cuda.is_available()
     print("use cuda: {}".format(args.cuda))
@@ -299,7 +300,7 @@ if __name__ == "__main__":
     else:
         template_train = "/research/d1/gds/cxye23/datasets/data/{}_base.float32"
         template_model = "/research/d1/gds/cxye23/datasets/data/idec/ae_{}_{}.pkl"
-        data = np.fromfile(template_train.format(args.dataset), dtype=np.float32)
+        data = np.fromfile(template_train.format(args.dataset), dtype=np.float32)[:args.n_samples]
         data = data.reshape(-1, datasets[args.dataset])
         data = torch.from_numpy(data)
         args.n_input = datasets[args.dataset]
