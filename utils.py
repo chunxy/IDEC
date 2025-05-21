@@ -37,6 +37,16 @@ class MnistDataset(Dataset):
         return torch.from_numpy(np.array(self.x[idx])), torch.from_numpy(
             np.array(self.y[idx])), torch.from_numpy(np.array(idx))
 
+class Float32Dataset(Dataset):
+
+    def __init__(self, path, dim):
+        self.data = np.fromfile(path, dtype=np.float32).reshape(-1, dim)
+
+    def __len__(self):
+        return self.data.shape[0]
+
+    def __getitem__(self, idx):
+        return torch.from_numpy(self.data[idx]), torch.from_numpy(np.array(idx))
 
 #######################################################
 # Evaluate Critiron

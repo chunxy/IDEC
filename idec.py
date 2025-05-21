@@ -20,7 +20,7 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torch.nn import Linear
 
-from utils import MnistDataset, cluster_acc
+from utils import Float32Dataset, MnistDataset, cluster_acc
 
 # import debugpy
 # try:
@@ -137,9 +137,8 @@ def pretrain_ae(model):
     optimizer = Adam(model.parameters(), lr=args.lr)
     for epoch in range(200):
         total_loss = 0.
-        for batch_idx, x in enumerate(train_loader):
-            assert type(x) is list
-            x = x[0].to(device)
+        for batch_idx, (x, _) in enumerate(train_loader):
+            x = x.to(device)
 
             optimizer.zero_grad()
             x_bar, z = model(x)
@@ -244,7 +243,7 @@ def train_idec():
                       args.tol)
                 print('Reached tolerance threshold. Stopping training.')
                 break
-        for batch_idx, (x, _, idx) in enumerate(train_loader):
+        for batch_idx, (x, idx) in enumerate(train_loader):
 
             x = x.to(device)
             idx = idx.to(device)
@@ -304,25 +303,24 @@ if __name__ == "__main__":
     else:
         template_train = "/research/d1/gds/cxye23/datasets/data/{}_base.float32"
         template_model = "/research/d1/gds/cxye23/datasets/data/idec/ae_{}_{}.pkl"
-        data = np.fromfile(template_train.format(args.dataset), dtype=np.float32)
-        data = data.reshape(-1, datasets[args.dataset])[:args.n_samples]
-        data = torch.from_numpy(data)
+
         args.n_input = datasets[args.dataset]
         args.n_z = args.n_input // 2
         args.pretrain_path = template_model.format(args.dataset, args.n_clusters)
-        dataset = torch.utils.data.TensorDataset(data)
+        dataset = Float32Dataset(template_train.format(args.dataset), args.n_input)
     print(args)
     model = train_idec()
 
-    encoded_train = model.ae(data).cpu().numpy()
-    encoded_train = encoded_train.reshape(-1, args.n_z).astype(np.float32)
-    template_encoded_train = "/research/d1/gds/cxye23/datasets/data/idec/{}-{}.base.float32"
-    encoded_train.tofile(template_encoded_train.format(args.dataset, args.n_clusters))
+    with torch.no_grad():
+        encoded_train = model.ae(dataset.data).cpu().numpy()
+        encoded_train = encoded_train.reshape(-1, args.n_z).astype(np.float32)
+        template_encoded_train = "/research/d1/gds/cxye23/datasets/data/idec/{}-{}.base.float32"
+        encoded_train.tofile(template_encoded_train.format(args.dataset, args.n_clusters))
 
-    template_query = "/research/d1/gds/cxye23/datasets/data/{}_query.float32"
-    query = np.fromfile(template_query.format(args.dataset), dtype=np.float32)
-    query = torch.from_numpy(query).to(device)
-    encoded_query = model.ae(query).cpu().numpy()
-    encoded_query = encoded_query.reshape(-1, args.n_z).astype(np.float32)
-    template_encoded_query = "/research/d1/gds/cxye23/datasets/data/idec/{}-{}.query.float32"
-    encoded_query.tofile(template_encoded_query.format(args.dataset, args.n_clusters))
+        template_query = "/research/d1/gds/cxye23/datasets/data/{}_query.float32"
+        query = np.fromfile(template_query.format(args.dataset), dtype=np.float32)
+        query = torch.from_numpy(query).to(device)
+        encoded_query = model.ae(query).cpu().numpy()
+        encoded_query = encoded_query.reshape(-1, args.n_z).astype(np.float32)
+        template_encoded_query = "/research/d1/gds/cxye23/datasets/data/idec/{}-{}.query.float32"
+        encoded_query.tofile(template_encoded_query.format(args.dataset, args.n_clusters))
