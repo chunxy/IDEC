@@ -314,7 +314,7 @@ if __name__ == "__main__":
         batch_size = 10000
         for i in range(0, args.n_samples, batch_size):
             end = min(i + batch_size, args.n_samples)
-            batch = dataset.full_data[i:end].to(device)
+            batch = torch.from_numpy(dataset.full_data[i:end]).to(device)
             encoded_batch = model.ae(batch).cpu().numpy()
             encoded_train.append(encoded_batch)
         encoded_train = np.concatenate(encoded_train, axis=0)
