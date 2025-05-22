@@ -108,8 +108,6 @@ class IDEC(nn.Module):
         print('load pretrained ae from', path)
 
     def forward(self, x):
-        # print GPU memory
-        print("IDEC forward", torch.cuda.memory_allocated())
         x_bar, z = self.ae(x)
         # cluster
         n_samples = z.size(0)
@@ -220,7 +218,6 @@ def train_idec():
     for epoch in range(100):
         print(f"Epoch {epoch} of 100")
         if epoch % args.update_interval == 0:
-            print("IDEC update", torch.cuda.memory_allocated())
             _, tmp_q = model(data)
 
             # update target distribution p
@@ -313,7 +310,14 @@ if __name__ == "__main__":
     model = train_idec()
 
     with torch.no_grad():
-        encoded_train = model.ae(dataset.full_data).cpu().numpy()
+        encoded_train = []
+        batch_size = 10000
+        for i in range(0, args.n_samples, batch_size):
+            end = min(i + batch_size, args.n_samples)
+            batch = dataset.full_data[i:end].to(device)
+            encoded_batch = model.ae(batch).cpu().numpy()
+            encoded_train.append(encoded_batch)
+        encoded_train = np.concatenate(encoded_train, axis=0)
         encoded_train = encoded_train.reshape(-1, args.n_z).astype(np.float32)
         template_encoded_train = "/research/d1/gds/cxye23/datasets/data/idec/{}-{}.base.float32"
         encoded_train.tofile(template_encoded_train.format(args.dataset, args.n_clusters))
