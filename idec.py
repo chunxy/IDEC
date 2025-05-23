@@ -315,8 +315,9 @@ if __name__ == "__main__":
         for i in range(0, args.n_samples, batch_size):
             end = min(i + batch_size, args.n_samples)
             batch = torch.from_numpy(dataset.full_data[i:end]).to(device)
-            encoded_batch = model.ae(batch).cpu().numpy()
-            encoded_train.append(encoded_batch)
+            dec_batch, enc_batch = model.ae(batch)
+            enc_batch = enc_batch.cpu().numpy()
+            encoded_train.append(enc_batch)
         encoded_train = np.concatenate(encoded_train, axis=0)
         encoded_train = encoded_train.reshape(-1, args.n_z).astype(np.float32)
         template_encoded_train = "/research/d1/gds/cxye23/datasets/data/idec/{}-{}.base.float32"
@@ -325,7 +326,8 @@ if __name__ == "__main__":
         template_query = "/research/d1/gds/cxye23/datasets/data/{}_query.float32"
         query = np.fromfile(template_query.format(args.dataset), dtype=np.float32)
         query = torch.from_numpy(query).to(device)
-        encoded_query = model.ae(query).cpu().numpy()
-        encoded_query = encoded_query.reshape(-1, args.n_z).astype(np.float32)
+        dec_query, enc_query = model.ae(query)
+        enc_query = enc_query.cpu().numpy()
+        enc_query = enc_query.reshape(-1, args.n_z).astype(np.float32)
         template_encoded_query = "/research/d1/gds/cxye23/datasets/data/idec/{}-{}.query.float32"
-        encoded_query.tofile(template_encoded_query.format(args.dataset, args.n_clusters))
+        enc_query.tofile(template_encoded_query.format(args.dataset, args.n_clusters))
