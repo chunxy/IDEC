@@ -183,23 +183,7 @@ def train_idec():
     data = dataset.data
     # y = dataset.y
     data = torch.Tensor(data).to(device)
-
-    # Process data in batches to avoid GPU memory overflow
-    batch_size = 1000
-    n_samples = data.size(0)
-    hidden_list = []
-    x_bar_list = []
-
-    with torch.no_grad():
-        for i in range(0, n_samples, batch_size):
-            end = min(i + batch_size, n_samples)
-            batch = data[i:end]
-            x_bar_batch, hidden_batch = model.ae(batch)
-            hidden_list.append(hidden_batch.cpu())
-            x_bar_list.append(x_bar_batch.cpu())
-
-    hidden = torch.cat(hidden_list, dim=0)
-    x_bar = torch.cat(x_bar_list, dim=0)
+    x_bar, hidden = model.ae(data)
 
     print(f"Fitting kmeans with {args.n_clusters} clusters")
     kmeans = BisectingKMeans(n_clusters=args.n_clusters, init='k-means++', bisecting_strategy="biggest_inertia")
@@ -251,6 +235,8 @@ def train_idec():
             reconstr_loss = F.mse_loss(x_bar, x)
             kl_loss = F.kl_div(q.log(), p[idx])
             loss = args.gamma * kl_loss + reconstr_loss
+            if batch_idx == 0:
+                print("First batch loss", loss.item())
 
             optimizer.zero_grad()
             loss.backward()
